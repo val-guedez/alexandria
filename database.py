@@ -155,6 +155,10 @@ def delete_collection(collection_id):
     cursor.execute("DELETE FROM collections WHERE id = ?", (collection_id,))
     cursor.execute("DELETE FROM story_collection WHERE collection_id = ?", (collection_id,))
 
+def add_story_to_collection(story_id, collection_id):
+  with get_db() as cursor:
+    cursor.execute("INSERT INTO story_collection (story_id, collection_id) VALUES (?, ?)", (story_id, collection_id))
+
 def get_stories():
   with get_db() as cursor:
     return cursor.execute("""SELECT * FROM stories""").fetchall()
