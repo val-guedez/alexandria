@@ -141,9 +141,16 @@ def get_tagged_stories_any(tags: list):
     parsedTags = parsedTags[3:]
   
   with get_db() as cursor:
-    return cursor.execute("""SELECT st.id
+    return cursor.execute("""SELECT s.id, s.name
                           FROM story_tag st
                           JOIN stories s on st.story_id = s.id
                           WHERE ?
     """, (parsedTags,)).fetchall()
+
+def get_stories_with_rating(rating):
+  with get_db() as cursor:
+    return cursor.execute("""SELECT id, name
+                          FROM stories
+                          WHERE rating = ?
+  """, (rating,)).fetchall()
   
