@@ -104,6 +104,13 @@ def update_story_file_path(story_id, file_path):
                    WHERE story_id = ?
     """, (file_path, story_id))
 
+# Only deletes record from database - not file itself
+def delete_story(story_id):
+  with get_db() as cursor:
+    cursor.execute("""DELETE FROM stories
+                   WHERE id = ?
+    """, (story_id,))
+
 def get_stories():
   with get_db() as cursor:
     return cursor.execute("""SELECT * FROM stories""").fetchall()
