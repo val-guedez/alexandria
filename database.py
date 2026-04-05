@@ -112,6 +112,8 @@ def delete_story(story_id):
     cursor.execute("""DELETE FROM stories
                    WHERE id = ?
     """, (story_id,))
+    cursor.execute("DELETE FROM story_tag WHERE story_id = ?", (story_id,))
+    cursor.execute("DELETE FROM story_collection WHERE story_id = ?", (story_id,))
 
 def create_tag(name):
   with get_db() as cursor:
@@ -123,6 +125,11 @@ def add_tags_to_story(story_id, tags):
       cursor.execute("""INSERT INTO story_tag (story_id, tag_id)
                      VALUES (?, ?)
       """, (story_id, tag))
+
+def delete_tag(tag_id):
+  with get_db() as cursor:
+    cursor.execute("DELETE FROM tags WHERE id = ?", (tag_id,))
+    cursor.execute("DELETE FROM story_tag WHERE tag_id = ?", (tag_id,))
 
 def create_collection(name, description):
   cols = "name"
@@ -142,6 +149,11 @@ def update_collection_name(collection_id, name):
 def update_collection_description(collection_id, description):
   with get_db() as cursor:
     cursor.execute("UPDATE collections SET description = ? WHERE collection_id = ?", (description, collection_id))
+
+def delete_collection(collection_id):
+  with get_db() as cursor:
+    cursor.execute("DELETE FROM collections WHERE id = ?", (collection_id,))
+    cursor.execute("DELETE FROM story_collection WHERE collection_id = ?", (collection_id,))
 
 def get_stories():
   with get_db() as cursor:
