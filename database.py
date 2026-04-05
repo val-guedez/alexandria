@@ -31,6 +31,7 @@ def initial_db_setup():
     cursor.execute("""CREATE TABLE tags (
                   id integer PRIMARY KEY AUTOINCREMENT,
                   name text NOT NULL UNIQUE
+                  created_at datetime DEFAULT current_timestamp
     )""")
 
     cursor.execute("""CREATE TABLE collections (
@@ -110,6 +111,10 @@ def delete_story(story_id):
     cursor.execute("""DELETE FROM stories
                    WHERE id = ?
     """, (story_id,))
+
+def create_tag(name):
+  with get_db() as cursor:
+    cursor.execute("""INSERT INTO tags (name) VALUES (?)""", (name,))
 
 def get_stories():
   with get_db() as cursor:
