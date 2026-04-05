@@ -37,6 +37,7 @@ def initial_db_setup():
     cursor.execute("""CREATE TABLE collections (
                   id integer PRIMARY KEY AUTOINCREMENT, 
                   name text NOT NULL
+                  description text
     )""")
 
     cursor.execute("""CREATE TABLE story_tag (
@@ -122,6 +123,17 @@ def add_tags_to_story(story_id, tags):
       cursor.execute("""INSERT INTO story_tag (story_id, tag_id)
                      VALUES (?, ?)
       """, (story_id, tag))
+
+def create_collection(name, description):
+  cols = "name"
+  values = f"{name}"
+  if description != None:
+    cols += ", description"
+    values += f", {description}"
+  with get_db() as cursor:
+    cursor.execute("""INSERT INTO collections (?)
+                   VALUES (?)
+    """, (cols, values))
 
 def get_stories():
   with get_db() as cursor:
