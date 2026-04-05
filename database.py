@@ -52,5 +52,25 @@ def initial_db_setup():
 
 def get_stories():
   with get_db() as cursor:
-    return cursor.execute("""SELECT * FROM stories""").fetchall
+    return cursor.execute("""SELECT * FROM stories""").fetchall()
+
+def get_story_info(story_id: int):
+  with get_db() as cursor:
+    return cursor.execute("SELECT * FROM stories WHERE id = ?", (story_id,)).fetchone()
+
+# Gets any story that has any of these tags
+def get_tagged_stories_any(tags: list):
+  parsedTags = ""
+  if (len(tags) > 1):
+    for tag in tags:
+      parsedTags += f"OR st.tag_id = {tag} "
+      
+    parsedTags = parsedTags[3:]
+  
+  with get_db() as cursor:
+    return cursor.execute("""SELECT st.id
+                          FROM story_tag st
+                          JOIN stories s on st.story_id = s.id
+                          WHERE ?
+    """, (parsedTags,)).fetchall()
   
