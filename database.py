@@ -69,6 +69,41 @@ def create_story(name, summary, notes, rating, file_path):
   with get_db() as cursor:
     cursor.execute("""INSERT INTO stories (?) VALUES (?)""", (cols, values))
 
+def update_story_name(story_id, name):
+  with get_db() as cursor:
+    cursor.execute("""UPDATE stories
+                   SET name = ?
+                   WHERE story_id = ?
+    """, (name, story_id))
+
+def update_story_summary(story_id, summary):
+  with get_db() as cursor:
+    cursor.execute("""UPDATE stories
+                   SET summary = ?
+                   WHERE story_id = ?
+    """, (summary, story_id))
+
+def update_story_notes(story_id, notes):
+  with get_db() as cursor:
+    cursor.execute("""UPDATE stories
+                   SET notes = ?
+                   WHERE story_id = ?
+    """, (notes, story_id))
+
+def update_story_rating(story_id, rating):
+  with get_db() as cursor:
+    cursor.execute("""UPDATE stories
+                   SET rating = ?
+                   WHERE story_id = ?
+    """, (rating, story_id))
+
+def update_story_file_path(story_id, file_path):
+  with get_db() as cursor:
+    cursor.execute("""UPDATE stories
+                   SET file_path = ?
+                   WHERE story_id = ?
+    """, (file_path, story_id))
+
 def get_stories():
   with get_db() as cursor:
     return cursor.execute("""SELECT * FROM stories""").fetchall()
