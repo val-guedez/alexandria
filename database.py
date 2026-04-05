@@ -1,42 +1,56 @@
 import sqlite3
+from contextlib import contextmanager
+
+DB_PATH = "./my_library.db"
+
+@contextmanager
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    try:
+        yield conn.cursor()
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 def initial_db_setup():
-  conn = sqlite3.connect('my_library.db')
-  cursor = conn.cursor()
+  with get_db() as cursor:
+    cursor.execute("""CREATE TABLE stories (
+                  id integer PRIMARY KEY AUTOINCREMENT, 
+                  name text NOT NULL,
+                  summary text,
+                  notes text,
+                  rating integer,
+                  filepath text NOT NULL UNIQUE,
+                  added_at datetime DEFAULT current_timestamp            
+    )""")
 
-  cursor.execute("""CREATE TABLE stories (
-                 id integer PRIMARY KEY AUTOINCREMENT, 
-                 name text NOT NULL,
-                 summary text,
-                 notes text,
-                 rating integer,
-                 filepath text NOT NULL UNIQUE,
-                 added_at datetime DEFAULT current_timestamp             
-  )""")
+    cursor.execute("""CREATE TABLE tags (
+                  id integer PRIMARY KEY AUTOINCREMENT,
+                  name text NOT NULL UNIQUE
+    )""")
 
-  cursor.execute("""CREATE TABLE tags (
-                 id integer PRIMARY KEY AUTOINCREMENT,
-                 name text NOT NULL UNIQUE
-  )""")
+    cursor.execute("""CREATE TABLE collections (
+                  id integer PRIMARY KEY AUTOINCREMENT, 
+                  name text NOT NULL
+    )""")
 
-  cursor.execute("""CREATE TABLE collections (
-                 id integer PRIMARY KEY AUTOINCREMENT, 
-                 name text NOT NULL
-  )""")
+    cursor.execute("""CREATE TABLE story_tag (
+                  story_id REFERENCES stories(id),
+                  tag_id REFERENCES tags(id),
+                  PRIMARY KEY (story_id, tag_id)
+    )""")
 
-  cursor.execute("""CREATE TABLE story_tag (
-                 story_id REFERENCES stories(id),
-                 tag_id REFERENCES tags(id),
-                 PRIMARY KEY (story_id, tag_id)
-  )""")
+    cursor.execute("""CREATE TABLE story_collection (
+                  story_id REFERENCES stories(id),
+                  collection_id REFERENCES collections(id),
+                  PRIMARY KEY (story_id, collection_id)
+    )""")
 
-  cursor.execute("""CREATE TABLE story_collection (
-                 story_id REFERENCES stories(id),
-                 collection_id REFERENCES collections(id),
-                 PRIMARY KEY (story_id, collection_id)
-  )""")
-
-  conn.commit()
-
-  conn.close()
+def get_stories():
+  with get_db() as cursor:
+    return cursor.execute("""SELECT * FROM stories""").fetchall
   
