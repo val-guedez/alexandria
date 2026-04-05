@@ -116,6 +116,13 @@ def create_tag(name):
   with get_db() as cursor:
     cursor.execute("""INSERT INTO tags (name) VALUES (?)""", (name,))
 
+def add_tags_to_story(story_id, tags):
+  with get_db() as cursor:
+    for tag in tags:
+      cursor.execute("""INSERT INTO story_tag (story_id, tag_id)
+                     VALUES (?, ?)
+      """, (story_id, tag))
+
 def get_stories():
   with get_db() as cursor:
     return cursor.execute("""SELECT * FROM stories""").fetchall()
