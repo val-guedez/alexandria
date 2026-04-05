@@ -189,4 +189,13 @@ def get_stories_with_rating(rating):
                           FROM stories
                           WHERE rating = ?
   """, (rating,)).fetchall()
+
+def get_stories_in_collection(collection_id):
+  with get_db() as cursor:
+    cursor.execute("""SELECT s.id, s.name
+                   FROM stories s
+                   JOIN story_collection c
+                   ON s.id = c.story_id
+                   WHERE c.collection_id = ?
+  """, (collection_id,))
   
