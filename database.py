@@ -36,7 +36,7 @@ def initial_db_setup():
 
     cursor.execute("""CREATE TABLE collections (
                   id integer PRIMARY KEY AUTOINCREMENT, 
-                  name text NOT NULL
+                  name text NOT NULL UNIQUE
                   description text
     )""")
 
@@ -134,6 +134,14 @@ def create_collection(name, description):
     cursor.execute("""INSERT INTO collections (?)
                    VALUES (?)
     """, (cols, values))
+
+def update_collection_name(collection_id, name):
+  with get_db() as cursor:
+    cursor.execute("UPDATE collections SET name = ? WHERE collection_id = ?", (name, collection_id))
+
+def update_collection_description(collection_id, description):
+  with get_db() as cursor:
+    cursor.execute("UPDATE collections SET description = ? WHERE collection_id = ?", (description, collection_id))
 
 def get_stories():
   with get_db() as cursor:
