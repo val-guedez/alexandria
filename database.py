@@ -24,7 +24,7 @@ def initial_db_setup():
                   summary text,
                   notes text,
                   rating integer,
-                  filepath text NOT NULL UNIQUE,
+                  file_path text NOT NULL UNIQUE,
                   added_at datetime DEFAULT current_timestamp            
     )""")
 
@@ -49,6 +49,25 @@ def initial_db_setup():
                   collection_id REFERENCES collections(id),
                   PRIMARY KEY (story_id, collection_id)
     )""")
+
+def create_story(name, summary, notes, rating, file_path):
+  cols = "name"
+  values = f"{name}"
+  if summary != None:
+    cols += ", summary"
+    values += f", {summary}"
+  if notes != None:
+    cols += ", notes"
+    values += f", {notes}"
+  if rating != None:
+    cols += ", rating"
+    values += f", {rating}"
+  
+  cols += ", file_path"
+  values += f", {file_path}"
+  
+  with get_db() as cursor:
+    cursor.execute("""INSERT INTO stories (?) VALUES (?)""", (cols, values))
 
 def get_stories():
   with get_db() as cursor:
