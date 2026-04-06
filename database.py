@@ -183,6 +183,23 @@ def get_tagged_stories_any(tags: list):
                           WHERE ?
     """, (parsedTags,)).fetchall()
 
+# Gets any story that has all of these tags
+def get_tagged_stories_all(tags: list):
+  parsedTags = ""
+  if (len(tags) > 1):
+    for tag in tags:
+      parsedTags += f"OR st.tag_id = {tag} "
+      
+    parsedTags = parsedTags[3:]
+  with get_db() as cursor:
+    return cursor.execute("""SELECT s.id, s.name
+                          FROM stories s
+                          JOIN story_tag st
+                          ON s.id = st.story_id
+                          WHERE ?
+
+    """, (parsedTags,)).fetchall()
+
 def get_stories_with_rating(rating):
   with get_db() as cursor:
     return cursor.execute("""SELECT id, name
