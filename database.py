@@ -52,24 +52,25 @@ def initial_db_setup():
                   PRIMARY KEY (story_id, collection_id)
     )""")
 
-def create_story(name, summary, notes, rating, file_path):
-  cols = "name"
-  values = f"{name}"
-  if summary != None:
-    cols += ", summary"
-    values += f", {summary}"
-  if notes != None:
-    cols += ", notes"
-    values += f", {notes}"
-  if rating != None:
-    cols += ", rating"
-    values += f", {rating}"
-  
-  cols += ", file_path"
-  values += f", {file_path}"
-  
+def create_story(name, file_path, summary=None, notes=None, rating=None):
+  # build a dict of only the values that were provided
+  fields = {"name": name, "file_path": file_path}
+  if summary is not None:
+      fields["summary"] = summary
+  if notes is not None:
+      fields["notes"] = notes
+  if rating is not None:
+      fields["rating"] = rating
+
+  # construct query from the dict keys
+  cols = ", ".join(fields.keys())
+  placeholders = ", ".join("?" * len(fields))
+
   with get_db() as cursor:
-    cursor.execute("""INSERT INTO stories (?) VALUES (?)""", (cols, values))
+      cursor.execute(
+          f"INSERT INTO stories ({cols}) VALUES ({placeholders})",
+          tuple(fields.values())
+      )
 
 def update_story_name(story_id, name):
   with get_db() as cursor:
@@ -192,13 +193,12 @@ def get_tagged_stories_all(tags: list):
       
     parsedTags = parsedTags[3:]
   with get_db() as cursor:
-    return cursor.execute("""SELECT s.id, s.name
+    tags_count = cursor.execute("""SELECT id, name FROM (SELECT s.id, s.name, COUNT(*)
                           FROM stories s
                           JOIN story_tag st
                           ON s.id = st.story_id
-                          WHERE ?
-
-    """, (parsedTags,)).fetchall()
+                          WHERE ?) WHERE count = ?)
+    """, (parsedTags, len(tags))).fetchall()
 
 def get_stories_with_rating(rating):
   with get_db() as cursor:
