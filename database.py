@@ -173,6 +173,9 @@ def get_story_info(story_id: int):
 
 # Gets any story that has any of these tags
 def get_tagged_stories_any(tags: list):
+  if not tags:
+    return []
+
   placeholders = ", ".join("?" * len(tags))
   with get_db() as cursor:
       return cursor.execute(f"""
@@ -184,19 +187,18 @@ def get_tagged_stories_any(tags: list):
 
 # Gets any story that has all of these tags
 def get_tagged_stories_all(tags: list):
-  parsedTags = ""
-  if (len(tags) > 1):
-    for tag in tags:
-      parsedTags += f"OR st.tag_id = {tag} "
-      
-    parsedTags = parsedTags[3:]
+  if not tags:
+      return []
+  placeholders = ", ".join("?" * len(tags))
   with get_db() as cursor:
-    tags_count = cursor.execute("""SELECT id, name FROM (SELECT s.id, s.name, COUNT(*)
-                          FROM stories s
-                          JOIN story_tag st
-                          ON s.id = st.story_id
-                          WHERE ?) WHERE count = ?)
-    """, (parsedTags, len(tags))).fetchall()
+      return cursor.execute(f"""
+          SELECT s.id, s.name
+          FROM stories s
+          JOIN story_tag st ON s.id = st.story_id
+          WHERE st.tag_id IN ({placeholders})
+          GROUP BY s.id
+          HAVING COUNT(DISTINCT st.tag_id) = ?
+      """, (*tags, len(tags))).fetchall()
 
 def get_stories_with_rating(rating):
   with get_db() as cursor:
