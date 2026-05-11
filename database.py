@@ -132,16 +132,19 @@ def delete_tag(tag_id):
     cursor.execute("DELETE FROM tags WHERE id = ?", (tag_id,))
     cursor.execute("DELETE FROM story_tag WHERE tag_id = ?", (tag_id,))
 
-def create_collection(name, description):
-  cols = "name"
-  values = f"{name}"
-  if description != None:
-    cols += ", description"
-    values += f", {description}"
+def create_collection(name, description=None):
+  fields = {"name": name}
+
+  if description is not None:
+    fields["description"] = description
+
+  cols = ", ".join(fields.keys())
+  placeholders = ", ".join("?" * len(fields))
+
   with get_db() as cursor:
-    cursor.execute("""INSERT INTO collections (?)
-                   VALUES (?)
-    """, (cols, values))
+    cursor.execute(
+      f"INSERT INTO collections ({cols}) VALUES ({placeholders})", tuple(fields.values())
+      )
 
 def update_collection_name(collection_id, name):
   with get_db() as cursor:
